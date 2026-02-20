@@ -1,159 +1,190 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Iron & Mats Pro</title>
-    <link rel="manifest" href="data:application/manifest+json,{%22name%22:%22Iron%20%26%20Mats%22,%22short_name%22:%22IronMats%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22#121212%22,%22theme_color%22:%22#bb86fc%22}">
-    <style>
-        :root { --bg: #121212; --surface: #1e1e1e; --primary: #bb86fc; --text: #e0e0e0; --accent: #03dac6; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; padding-bottom: 50px; }
-        .card { background: var(--surface); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #333; }
-        h2 { color: var(--primary); font-size: 1.2rem; margin-bottom: 10px; }
-        input, select, button { width: 100%; padding: 12px; margin: 5px 0; border-radius: 8px; border: none; font-size: 16px; box-sizing: border-box; }
-        button { background: var(--primary); color: #000; font-weight: bold; }
-        .timer-display { font-size: 3.5rem; text-align: center; margin: 10px 0; font-family: monospace; color: var(--accent); }
-        .log-entry { font-size: 0.85rem; color: #aaa; border-bottom: 1px solid #333; padding: 4px 0; display: flex; justify-content: space-between; }
-        .weight-input-group { display: flex; gap: 10px; align-items: center; margin-top: 10px; }
-        .weight-input-group input { flex: 2; background: #2c2c2c; color: white; border: 1px solid var(--primary); }
-        .weight-input-group button { flex: 1; background: var(--accent); }
-        .info-tag { font-size: 10px; background: #333; padding: 2px 6px; border-radius: 4px; color: var(--primary); text-transform: uppercase; }
-        .history-section { max-height: 100px; overflow-y: auto; margin-top: 10px; background: #161616; padding: 8px; border-radius: 6px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Strongman 5/3/1 Tracker</title>
+<style>
+  :root {
+    --primary: #d32f2f;
+    --bg: #1e1e1e;
+    --card-bg: #2d2d2d;
+    --text: #ffffff;
+    --text-muted: #aaaaaa;
+  }
+  body { 
+    font-family: system-ui, -apple-system, sans-serif; 
+    background: var(--bg); 
+    color: var(--text); 
+    max-width: 600px; 
+    margin: 0 auto; 
+    padding: 20px; 
+    line-height: 1.5;
+  }
+  h1 { text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
+  h2 { color: var(--primary); margin-top: 0; }
+  h3 { margin-bottom: 5px; font-size: 1.1em; }
+  .card { 
+    background: var(--card-bg); 
+    padding: 20px; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+    margin-bottom: 25px; 
+  }
+  .input-group { margin-bottom: 15px; }
+  label { font-weight: bold; display: block; margin-bottom: 5px; color: var(--text-muted); }
+  input, select { 
+    width: 100%; 
+    padding: 12px; 
+    box-sizing: border-box; 
+    border: 1px solid #444; 
+    border-radius: 6px; 
+    background: #111; 
+    color: white; 
+    font-size: 16px;
+  }
+  button { 
+    width: 100%; 
+    background: var(--primary); 
+    color: white; 
+    border: none; 
+    padding: 15px; 
+    font-size: 18px; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    font-weight: bold; 
+    text-transform: uppercase;
+  }
+  button:hover { background: #b71c1c; }
+  table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 15px; }
+  th, td { border-bottom: 1px solid #444; padding: 12px 5px; text-align: left; }
+  th { color: var(--text-muted); font-size: 0.9em; text-transform: uppercase; }
+  td strong { font-size: 1.1em; color: var(--primary); }
+  ul { padding-left: 20px; margin-top: 0; }
+  li { margin-bottom: 8px; }
+</style>
 </head>
 <body>
 
-    <div class="card">
-        <div id="timer-display" class="timer-display">00:00</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-            <button onclick="startTimer(60)">RPE ≤5 (1m)</button>
-            <button onclick="startTimer(120)">RPE 6-7 (2m)</button>
-            <button onclick="startTimer(180)">RPE 8-9 (3m)</button>
-            <button onclick="startTimer(300)">RPE 10 (5m)</button>
-        </div>
+  <h1>Strongman 5/3/1</h1>
+
+  <div class="card">
+    <h2>Program Setup</h2>
+    <div class="input-group">
+      <label for="sandbagTM">Sandbag Training Max (lbs)</label>
+      <input type="number" id="sandbagTM" value="200">
     </div>
-
-    <h2>Add Exercise</h2>
-    <div class="card">
-        <input type="text" id="ex-name" placeholder="Exercise Name">
-        <select id="ex-prog">
-            <option value="Juggernaut">Juggernaut 2.0</option>
-            <option value="Hypertrophy">Hypertrophy Progression</option>
-        </select>
-        <button onclick="addExercise()">Create Exercise</button>
+    <div class="input-group">
+      <label for="dinnieTM">Dinnie Total System TM (lbs)</label>
+      <input type="number" id="dinnieTM" value="400">
     </div>
+    <div class="input-group">
+      <label for="weekSelect">Current Phase</label>
+      <select id="weekSelect">
+        <option value="1">Week 1 (Volume - 3x5)</option>
+        <option value="2">Week 2 (Heavy - 3x3)</option>
+        <option value="3">Week 3 (Realization - 5/3/1)</option>
+        <option value="4">Week 4 (Deload)</option>
+      </select>
+    </div>
+    <button onclick="calculateLifts()">Calculate Weights</button>
+  </div>
 
-    <h2>Your Program</h2>
-    <div id="exercise-list"></div>
+  <div class="card" id="day1">
+    <h2>Day 1: Explosive & Back</h2>
+    <h3>Main Lift: Sandbag Over Shoulder</h3>
+    <div id="day1Lifts"></div>
+    
+    <h3>Accessory Work</h3>
+    <ul>
+      <li><strong>Chest-Supported Rows:</strong> 5 sets x 10-15 reps</li>
+      <li><strong>Upper Circuit (3 Rounds):</strong><br>
+        - DB Lateral Raises (10-15 reps)<br>
+        - Heavy Hammer Curls (10-15 reps)<br>
+        - Cable Triceps Pushdowns (10-15 reps)
+      </li>
+      <li><strong>Finisher:</strong> Landmine Anti-Rotations (8-10/side) OR Suitcase Carries</li>
+    </ul>
+  </div>
 
-    <script>
-        let exercises = JSON.parse(localStorage.getItem('workout_v2')) || [];
-        let timerInterval;
+  <div class="card" id="day2">
+    <h2>Day 2: Dinnie & Press</h2>
+    <h3>Main Lift: Cerberus Dinnie Pulls</h3>
+    <div id="day2Lifts"></div>
+    
+    <h3>Accessory Work</h3>
+    <ul>
+      <li><strong>Landmine Viking Press:</strong> 4 sets x 6-10 reps</li>
+      <li><strong>Upper Circuit (3 Rounds):</strong><br>
+        - Face Pulls (10-15 reps)<br>
+        - Reverse Barbell Curls (10-15 reps)<br>
+        - Overhead Triceps Ext (10-15 reps)
+      </li>
+      <li><strong>Finisher:</strong> Ab Wheel, Pallof Press, OR Sandbag over Bar</li>
+    </ul>
+  </div>
 
-        function save() { localStorage.setItem('workout_v2', JSON.stringify(exercises)); }
+  <script>
+    const percentages = {
+      "1": [0.65, 0.75, 0.85],
+      "2": [0.70, 0.80, 0.90],
+      "3": [0.75, 0.85, 0.95],
+      "4": [0.40, 0.50, 0.60]
+    };
+    
+    const bagTargets = {
+      "1": ["5 reps", "5 reps", "60-sec AMRAP"],
+      "2": ["3 reps", "3 reps", "60-sec AMRAP"],
+      "3": ["5 reps", "3 reps", "60-sec AMRAP"],
+      "4": ["5 reps", "5 reps", "5 reps (No AMRAP)"]
+    };
 
-        function addExercise() {
-            const name = document.getElementById('ex-name').value;
-            const prog = document.getElementById('ex-prog').value;
-            if(!name) return;
-            exercises.push({ id: Date.now(), name, prog, week: 1, logs: [] });
-            save(); render();
-            document.getElementById('ex-name').value = '';
-        }
+    const dinnieTargets = {
+      "1": ["5 reps", "5 reps", "AMRAP"],
+      "2": ["3 reps", "3 reps", "AMRAP"],
+      "3": ["5 reps", "3 reps", "AMRAP"],
+      "4": ["5 reps", "5 reps", "5 reps (No AMRAP)"]
+    };
 
-        function logWeight(id) {
-            const input = document.getElementById(`weight-${id}`);
-            const weight = input.value;
-            if(!weight) return;
-            const ex = exercises.find(e => e.id === id);
-            const entry = {
-                date: new Date().toLocaleDateString(),
-                week: ex.week,
-                weight: weight
-            };
-            ex.logs.unshift(entry); // Add to start of array
-            save(); render();
-            input.value = '';
-        }
+    function calculateLifts() {
+      const sBag = parseInt(document.getElementById('sandbagTM').value) || 0;
+      const dinnie = parseInt(document.getElementById('dinnieTM').value) || 0;
+      const week = document.getElementById('weekSelect').value;
+      
+      const p = percentages[week];
+      const tBag = bagTargets[week];
+      const tDin = dinnieTargets[week];
 
-        function getProgression(ex) {
-            if (ex.prog === 'Hypertrophy') {
-                const reps = ["10-12", "12-15", "15-18", "18-20"];
-                return `Week ${ex.week}: 3 Sets of ${reps[(ex.week-1) % 4]} Reps`;
-            } else {
-                const waves = ["10s", "8s", "5s", "3s"];
-                const phases = ["Accumulation", "Intensification", "Realization", "Deload"];
-                const wIdx = Math.floor((ex.week - 1) / 4) % 4;
-                const pIdx = (ex.week - 1) % 4;
-                return `${waves[wIdx]} Wave: ${phases[pIdx]}`;
-            }
-        }
+      // Build Day 1 Table
+      let table1 = `<table><tr><th>Set</th><th>%</th><th>Weight</th><th>Target</th></tr>`;
+      for(let i=0; i<3; i++) {
+        table1 += `<tr>
+          <td>${i+1}</td>
+          <td>${Math.round(p[i]*100)}%</td>
+          <td><strong>${Math.round(sBag * p[i])} lbs</strong></td>
+          <td>${tBag[i]}</td>
+        </tr>`;
+      }
+      table1 += `</table>`;
+      document.getElementById('day1Lifts').innerHTML = table1;
 
-        function render() {
-            const list = document.getElementById('exercise-list');
-            list.innerHTML = '';
-            exercises.forEach(ex => {
-                const div = document.createElement('div');
-                div.className = 'card';
-                div.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                        <div>
-                            <span class="info-tag">${ex.prog}</span>
-                            <div style="font-weight:bold; font-size:1.1rem; margin: 4px 0;">${ex.name}</div>
-                            <div style="color:var(--accent); font-size:0.9rem;">${getProgression(ex)}</div>
-                        </div>
-                        <button onclick="deleteEx(${ex.id})" style="width:auto; background:none; color:#666; padding:0;">✕</button>
-                    </div>
-
-                    <div class="weight-input-group">
-                        <input type="number" id="weight-${ex.id}" placeholder="Weight (lbs/kg)" inputmode="decimal">
-                        <button onclick="logWeight(${ex.id})">Log Set</button>
-                    </div>
-
-                    <div class="history-section">
-                        ${ex.logs.slice(0, 5).map(l => `
-                            <div class="log-entry">
-                                <span>Wk ${l.week} - ${l.date}</span>
-                                <strong>${l.weight}</strong>
-                            </div>
-                        `).join('') || '<div style="font-size:10px; color:#555;">No logs yet</div>'}
-                    </div>
-
-                    <button onclick="nextWeek(${ex.id})" style="background:#333; color:white; margin-top:10px; font-size:12px;">Advance to Next Week</button>
-                `;
-                list.appendChild(div);
-            });
-        }
-
-        function nextWeek(id) {
-            const ex = exercises.find(e => e.id === id);
-            ex.week++; save(); render();
-        }
-
-        function deleteEx(id) {
-            if(confirm('Delete this exercise?')) {
-                exercises = exercises.filter(e => e.id !== id);
-                save(); render();
-            }
-        }
-
-        function startTimer(sec) {
-            clearInterval(timerInterval);
-            let time = sec;
-            const display = document.getElementById('timer-display');
-            timerInterval = setInterval(() => {
-                const m = Math.floor(time / 60);
-                const s = time % 60;
-                display.innerText = `${m}:${s < 10 ? '0' : ''}${s}`;
-                if (time-- <= 0) {
-                    clearInterval(timerInterval);
-                    display.innerText = "DONE";
-                    if(navigator.vibrate) navigator.vibrate([300, 100, 300]);
-                }
-            }, 1000);
-        }
-
-        render();
-    </script>
+      // Build Day 2 Table
+      let table2 = `<table><tr><th>Set</th><th>%</th><th>Total Wt</th><th>Target</th></tr>`;
+      for(let i=0; i<3; i++) {
+        table2 += `<tr>
+          <td>${i+1}</td>
+          <td>${Math.round(p[i]*100)}%</td>
+          <td><strong>${Math.round(dinnie * p[i])} lbs</strong></td>
+          <td>${tDin[i]}</td>
+        </tr>`;
+      }
+      table2 += `</table>`;
+      document.getElementById('day2Lifts').innerHTML = table2;
+    }
+    
+    // Run on startup
+    window.onload = calculateLifts;
+  </script>
 </body>
 </html>
