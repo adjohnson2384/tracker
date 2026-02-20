@@ -2,189 +2,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Strongman 5/3/1 Tracker</title>
-<style>
-  :root {
-    --primary: #d32f2f;
-    --bg: #1e1e1e;
-    --card-bg: #2d2d2d;
-    --text: #ffffff;
-    --text-muted: #aaaaaa;
-  }
-  body { 
-    font-family: system-ui, -apple-system, sans-serif; 
-    background: var(--bg); 
-    color: var(--text); 
-    max-width: 600px; 
-    margin: 0 auto; 
-    padding: 20px; 
-    line-height: 1.5;
-  }
-  h1 { text-align: center; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }
-  h2 { color: var(--primary); margin-top: 0; }
-  h3 { margin-bottom: 5px; font-size: 1.1em; }
-  .card { 
-    background: var(--card-bg); 
-    padding: 20px; 
-    border-radius: 12px; 
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
-    margin-bottom: 25px; 
-  }
-  .input-group { margin-bottom: 15px; }
-  label { font-weight: bold; display: block; margin-bottom: 5px; color: var(--text-muted); }
-  input, select { 
-    width: 100%; 
-    padding: 12px; 
-    box-sizing: border-box; 
-    border: 1px solid #444; 
-    border-radius: 6px; 
-    background: #111; 
-    color: white; 
-    font-size: 16px;
-  }
-  button { 
-    width: 100%; 
-    background: var(--primary); 
-    color: white; 
-    border: none; 
-    padding: 15px; 
-    font-size: 18px; 
-    border-radius: 6px; 
-    cursor: pointer; 
-    font-weight: bold; 
-    text-transform: uppercase;
-  }
-  button:hover { background: #b71c1c; }
-  table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 15px; }
-  th, td { border-bottom: 1px solid #444; padding: 12px 5px; text-align: left; }
-  th { color: var(--text-muted); font-size: 0.9em; text-transform: uppercase; }
-  td strong { font-size: 1.1em; color: var(--primary); }
-  ul { padding-left: 20px; margin-top: 0; }
-  li { margin-bottom: 8px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Strongman Tracker Pro</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <h1>Strongman 5/3/1</h1>
+  <div class="header">
+    <h1>Day 1: Power & Back</h1>
+  </div>
 
-  <div class="card">
-    <h2>Program Setup</h2>
-    <div class="input-group">
-      <label for="sandbagTM">Sandbag Training Max (lbs)</label>
-      <input type="number" id="sandbagTM" value="200">
-    </div>
-    <div class="input-group">
-      <label for="dinnieTM">Dinnie Total System TM (lbs)</label>
-      <input type="number" id="dinnieTM" value="400">
-    </div>
-    <div class="input-group">
-      <label for="weekSelect">Current Phase</label>
-      <select id="weekSelect">
-        <option value="1">Week 1 (Volume - 3x5)</option>
-        <option value="2">Week 2 (Heavy - 3x3)</option>
-        <option value="3">Week 3 (Realization - 5/3/1)</option>
-        <option value="4">Week 4 (Deload)</option>
+  <div class="container">
+    <div class="controls">
+      <select id="weekSelect" onchange="generateWorkout()">
+        <option value="1">Week 1 (3x5)</option>
+        <option value="2">Week 2 (3x3)</option>
+        <option value="3">Week 3 (5/3/1)</option>
       </select>
+      <button class="btn-primary" onclick="saveWorkout()">Save Workout</button>
     </div>
-    <button onclick="calculateLifts()">Calculate Weights</button>
+
+    <div id="workoutContainer"></div>
   </div>
 
-  <div class="card" id="day1">
-    <h2>Day 1: Explosive & Back</h2>
-    <h3>Main Lift: Sandbag Over Shoulder</h3>
-    <div id="day1Lifts"></div>
-    
-    <h3>Accessory Work</h3>
-    <ul>
-      <li><strong>Chest-Supported Rows:</strong> 5 sets x 10-15 reps</li>
-      <li><strong>Upper Circuit (3 Rounds):</strong><br>
-        - DB Lateral Raises (10-15 reps)<br>
-        - Heavy Hammer Curls (10-15 reps)<br>
-        - Cable Triceps Pushdowns (10-15 reps)
-      </li>
-      <li><strong>Finisher:</strong> Landmine Anti-Rotations (8-10/side) OR Suitcase Carries</li>
-    </ul>
-  </div>
-
-  <div class="card" id="day2">
-    <h2>Day 2: Dinnie & Press</h2>
-    <h3>Main Lift: Cerberus Dinnie Pulls</h3>
-    <div id="day2Lifts"></div>
-    
-    <h3>Accessory Work</h3>
-    <ul>
-      <li><strong>Landmine Viking Press:</strong> 4 sets x 6-10 reps</li>
-      <li><strong>Upper Circuit (3 Rounds):</strong><br>
-        - Face Pulls (10-15 reps)<br>
-        - Reverse Barbell Curls (10-15 reps)<br>
-        - Overhead Triceps Ext (10-15 reps)
-      </li>
-      <li><strong>Finisher:</strong> Ab Wheel, Pallof Press, OR Sandbag over Bar</li>
-    </ul>
-  </div>
-
-  <script>
-    const percentages = {
-      "1": [0.65, 0.75, 0.85],
-      "2": [0.70, 0.80, 0.90],
-      "3": [0.75, 0.85, 0.95],
-      "4": [0.40, 0.50, 0.60]
-    };
-    
-    const bagTargets = {
-      "1": ["5 reps", "5 reps", "60-sec AMRAP"],
-      "2": ["3 reps", "3 reps", "60-sec AMRAP"],
-      "3": ["5 reps", "3 reps", "60-sec AMRAP"],
-      "4": ["5 reps", "5 reps", "5 reps (No AMRAP)"]
-    };
-
-    const dinnieTargets = {
-      "1": ["5 reps", "5 reps", "AMRAP"],
-      "2": ["3 reps", "3 reps", "AMRAP"],
-      "3": ["5 reps", "3 reps", "AMRAP"],
-      "4": ["5 reps", "5 reps", "5 reps (No AMRAP)"]
-    };
-
-    function calculateLifts() {
-      const sBag = parseInt(document.getElementById('sandbagTM').value) || 0;
-      const dinnie = parseInt(document.getElementById('dinnieTM').value) || 0;
-      const week = document.getElementById('weekSelect').value;
-      
-      const p = percentages[week];
-      const tBag = bagTargets[week];
-      const tDin = dinnieTargets[week];
-
-      // Build Day 1 Table
-      let table1 = `<table><tr><th>Set</th><th>%</th><th>Weight</th><th>Target</th></tr>`;
-      for(let i=0; i<3; i++) {
-        table1 += `<tr>
-          <td>${i+1}</td>
-          <td>${Math.round(p[i]*100)}%</td>
-          <td><strong>${Math.round(sBag * p[i])} lbs</strong></td>
-          <td>${tBag[i]}</td>
-        </tr>`;
-      }
-      table1 += `</table>`;
-      document.getElementById('day1Lifts').innerHTML = table1;
-
-      // Build Day 2 Table
-      let table2 = `<table><tr><th>Set</th><th>%</th><th>Total Wt</th><th>Target</th></tr>`;
-      for(let i=0; i<3; i++) {
-        table2 += `<tr>
-          <td>${i+1}</td>
-          <td>${Math.round(p[i]*100)}%</td>
-          <td><strong>${Math.round(dinnie * p[i])} lbs</strong></td>
-          <td>${tDin[i]}</td>
-        </tr>`;
-      }
-      table2 += `</table>`;
-      document.getElementById('day2Lifts').innerHTML = table2;
-    }
-    
-    // Run on startup
-    window.onload = calculateLifts;
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
